@@ -40,9 +40,10 @@
           $dropzone.removeClass('over empty');
           
           if ($mergelist.attr('data-uri') == '#') {
-            models.Playlist.create('test').done(function (temp) {
+            models.Playlist.createTemporary('Untitled Playlist').done(function (temp) {
               templist = temp;
               $mergelist.attr('data-uri', templist.uri);
+              $mergelist.find('.addplaylist').append(buttons.Button.withLabel('Add as Playlist').node);
             });
           } else {
             templist = models.Playlist.fromURI($mergelist.attr('data-uri'));
@@ -50,25 +51,11 @@
           
           templist.load(['tracks']).done(function(temp) {            
             models.Playlist.fromURI(e.dataTransfer.getData('text')).load(['name', 'tracks']).done(function (playlist) {
-              
               playlist.tracks.snapshot(0, 1000).done(function(snapshot) {
                 temp.tracks.add(snapshot.toArray());
               });
-              
-              /*var list = List.forPlaylist(playlist, {
-                'fetch'  : 'once',
-                'fields' : [ 'star', 'track', 'artist', 'album' ],
-                'header' : 'no',
-                'height' : 'fixed',
-                'style'  : 'rounded',
-              });
-              $mergelist.find('.tracks').append(list.node);
-              list.init();*/
-            
               $mergelist.find('.playlists').append($('<a/>').attr('href', playlist.uri).text(playlist.name));
             });
-            
-            //$mergelist.find('.seeall').attr('href', temp.uri).show();
           });
           
         }, false);
@@ -92,7 +79,7 @@
     </div>
     <div class="controls">
       <div class="dropzone"></div>
-      <a href="" class="seeall">See All Tracks</a>
+      <div class="addplaylist"></div>
     </div>
     <div class="tracks">
       <p>
