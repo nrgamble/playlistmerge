@@ -1,0 +1,64 @@
+body, html { overflow: visible !important; }
+
+.clearfix:after {
+  visibility: hidden;
+  display: block;
+  font-size: 0;
+  content: " ";
+  clear: both;
+  height: 0;
+}
+
+.mergelist {
+  margin: 0 0 20px 0;
+}
+.header {
+  margin: 0 0 4px 0;
+}
+.playlists a {
+  margin: 0 4px 0 0;
+}
+
+
+.controls {
+  float: left;
+  margin: 0 6px 0 0;
+  text-align: center;
+}
+.dropzone {
+  height: 128px;
+  width: 128px;
+  margin: 0 0 6px 0;
+  border: 1px solid #d6d5d2;
+  border-radius: 4px;
+  background: url(sp://playlistmerge/img/add.png) no-repeat center;
+  background-size: 100px 100px;
+}
+.seeall { display: none; }
+
+.tracks {
+  height: 256px;
+  border: 1px solid #d6d5d2;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.tracks p {
+  text-align: center;
+}
+.play {
+  display: block;
+  width: 79px;
+  height: 79px;
+  margin: 0 auto;
+  background: url(sp://playlistmerge/img/play.png);
+  cursor: pointer;
+}
+.play:hover {
+  background: url(sp://playlistmerge/img/play-over.png);
+}
+   
+.over {
+  border-style: dashed;
+  border-color: #7ab800;
+  background-image: url(sp://playlistmerge/img/add-over.png);
+}

@@ -1,0 +1,16 @@
+{
+  "AppDescription": { "en": "Playlist Merge" },
+	"AppIcon": { "36x18": "tutorial.png" },
+	"AppName": { "en": "Playlist Merge" },
+	"BundleIdentifier" : "playlistmerge",
+	"BundleType" : "Application",
+	"BundleVersion" : "0.1",
+	"Dependencies" : {
+	  "api"       : "1.10.2",
+    "views"     : "1.18.1"
+  },
+	"SupportedLanguages" : [ "en" ],
+	"VendorIdentifier": "com.nickgamble",
+
+  "AcceptedLinkTypes" : [ "playlist" ]
+}
