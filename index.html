@@ -15,6 +15,15 @@
   <script>
     require(['$api/models', '$views/buttons', '$views/utils/dnd', '$views/list#List'], function(models, buttons, dnd, List) {
       
+      var MERGELISTS = localStorage['playlistmerge.mergelists'];
+      
+      if (typeof MERGELISTS != 'undefined') {
+        MERGELISTS = JSON.parse(MERGELISTS);
+       // generate all existing playlists
+      } else {
+        MERGELISTS = [];
+      }
+      
       var dropBoxes = document.querySelectorAll('.dropzone');
       
       [].forEach.call(dropBoxes, function(dropBox) {
@@ -34,32 +43,74 @@
           if (e.preventDefault) { e.preventDefault(); }
           
           var $dropzone  = $(this);
-          var $mergelist = $dropzone.parents('.mergelist');
-          var templist;
-          
           $dropzone.removeClass('over empty');
           
-          if ($mergelist.attr('data-uri') == '#') {
+          var $mergelist = $dropzone.parents('.mergelist');
+          
+          var index = $mergelist.attr('data-index');
+          
+          var mergelist;
+          
+          if (MERGELISTS.length) {
+            mergelist = MERGELISTS[index];
+          } else {
+            mergelist  = {
+              'name'      : '',
+              'playlists' : [],
+            };
+          }
+          
+          var playlistURI = e.dataTransfer.getData('text');
+          
+          if (mergelist.playlists.indexOf(playlistURI) != -1) {
+            return;
+          }
+          
+          var templist;
+          
+          if ($mergelist.attr('data-uri') == '#') {           
             models.Playlist.createTemporary('Untitled Playlist').done(function (temp) {
               templist = temp;
+              
               $mergelist.attr('data-uri', templist.uri);
-              $mergelist.find('.addplaylist').append(buttons.Button.withLabel('Add as Playlist').node);
+              
+              var add = buttons.Button.withLabel('Add as Playlist');
+              add.setIcon('img/add-icon.png');
+              $mergelist.find('.addplaylist').append(add.node);
+              
+              $mergelist.find('.play').on('click', function () { pm_play($(this)); });
+              
+              mergelist.name = 'Untitled Playlist';
             });
           } else {
             templist = models.Playlist.fromURI($mergelist.attr('data-uri'));
           }
           
           templist.load(['tracks']).done(function(temp) {            
-            models.Playlist.fromURI(e.dataTransfer.getData('text')).load(['name', 'tracks']).done(function (playlist) {
+            models.Playlist.fromURI(playlistURI).load(['name', 'tracks']).done(function (playlist) {
+
               playlist.tracks.snapshot(0, 1000).done(function(snapshot) {
                 temp.tracks.add(snapshot.toArray());
               });
+              
               $mergelist.find('.playlists').append($('<a/>').attr('href', playlist.uri).text(playlist.name));
+              mergelist.playlists.push(playlist.uri);
             });
           });
           
+          MERGELISTS[index] = mergelist;
+          localStorage['playlistmerge.mergelists'] = JSON.stringify(MERGELISTS);
         }, false);
       });
+      
+      function pm_play($pb) {
+        var $mergelist = $pb.parents('.mergelist');
+        
+        models.player.load().done(function (player) {
+          player.setShuffle(true);
+          player.playContext(models.Playlist.fromURI($mergelist.attr('data-uri')));
+        });
+      }
 
     });
   </script>
@@ -72,7 +123,7 @@
   <p>Welcome to Playlist Merge, mutha ucka!</p>
   <hr>
    
-  <div class="mergelist clearfix" data-uri="#">
+  <div class="mergelist clearfix" data-uri="#" data-index="0">
     <div class="header">
       <h3><img src="sp://playlistmerge/img/playlist.png" width="14" height="14"> Untitled Playlist</h3>
       <strong>Including playlists:</strong> <span class="playlists"></span>

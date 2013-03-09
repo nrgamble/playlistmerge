@@ -34,7 +34,7 @@ body, html { overflow: visible !important; }
   background: url(sp://playlistmerge/img/add.png) no-repeat center;
   background-size: 100px 100px;
 }
-.seeall { display: none; }
+.addplaylist .sp-button-text { font-size: .9em; }
 
 .tracks {
   height: 256px;
