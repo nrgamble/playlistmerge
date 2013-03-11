@@ -59,7 +59,7 @@
               
               var add = buttons.Button.withLabel('Add as Playlist');
               add.setIcon('img/add-icon.png');
-              $mergelist.find('.addplaylist').append(add.node);
+              $mergelist.find('.add').append(add.node);
               
               $mergelist.find('.play').on('click', function () { mergelistPlay($(this).parents('.mergelist')); });
               
@@ -91,7 +91,7 @@
         playHistory = history.uri;
         history.load('tracks').done(function() {
           listHistory = List.forCollection(history.tracks, {
-            'fields' : [ 'star', 'track', 'artist', 'album' ],
+            'fields' : ['star', 'share', 'track', 'artist', 'album'],
             'height' : 'fixed'
           });
           $('.history').append(listHistory.node);
@@ -103,6 +103,7 @@
         models.player.load().done(function (player) {
           player.setShuffle(true);
           player.playContext(models.Playlist.fromURI($_mergelist.attr('data-uri')));
+          // TODO: don't attach on every play
           player.addEventListener('change:track', function () { mergelistChangeTrack($_mergelist); });
           mergelistChangeTrack($_mergelist);
         });
@@ -114,6 +115,9 @@
             models.Playlist.fromURI(playHistory).load(['tracks']).done(function (history) {
               history.tracks.add(player.track);
               listHistory.refresh();
+              $('.sp-list-item').on('dblclick', function (e) {
+                e.stopImmediatePropagation();
+              });
             });
           }
         });
@@ -126,28 +130,23 @@
 
   <h1>Playlist Merge</h1>
   
-  <p>Welcome to Playlist Merge, mutha ucka!</p>
+  <p>Add playlists to a mergelist by dragging them from your sidebar</p>
   <hr>
    
   <div class="mergelist clearfix" data-uri="#" data-index="0">
-    <div class="header">
-      <h3>
-        <img src="sp://playlistmerge/img/playlist.png" width="14" height="14">
-        <span>Untitled Mergelist</span>
-        <input type="text">
-      </h3>
-      <strong>Including playlists:</strong> <span class="playlists"></span>
+    <div class="header clearfix">
+      <img src="sp://playlistmerge/img/playlist.png" width="14" height="14">
+      <h3>Untitled Mergelist</h3>
+      <input type="text">
+      <span class="add"></span>
     </div>
+    <p><strong>Including playlists:</strong> <span class="playlists"></span></p>
     <div class="controls">
       <div class="dropzone"></div>
-      <div class="addplaylist"></div>
+      <a class="play"></a>
     </div>
     <div class="tracks">
-      <p>
-        Add playlists to this mergelist by dragging them from your sidebar.<br />
-        As tracks from this mergelist are played, they'll be shown here.
-      </p>
-      <a class="play"></a>
+      <p>Play History</p>
       <div class="history"></div>
     </div>
   </div>

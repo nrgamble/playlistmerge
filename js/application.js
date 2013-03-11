@@ -9,7 +9,7 @@ if (typeof MERGELISTS == 'undefined') {
 
 $(function () {
   
-  $('h3 span').on('click', function (event) {
+  $('h3').on('click', function (e) {
     var $this  = $(this);
     var $input = $this.siblings('input');
     
@@ -17,20 +17,22 @@ $(function () {
     $input.val($.trim($this.text())).show().select();
   });
   
-  $('h3 input').on('blur', function (event) {
-    var $this = $(this);
-    var $span = $this.siblings('span');
-    var name  = $.trim($this.val());
-    
-    $this.hide();
-    if (name.length) {
-      $span.text(name);
-      var _index      = $span.parents('.mergelist').attr('data-index');
-      var _mergelist  = mergelistForIndex(_index);
-      _mergelist.name = name;
-      //mergelistSave(_index, _mergelist);
+  $('.header input').on('blur keypress', function (e) {
+    if (event.type == 'blur' || event.keyCode == 13) {
+      var $this = $(this);
+      var $span = $this.siblings('h3');
+      var name  = $.trim($this.val());
+      
+      $this.hide();
+      if (name.length) {
+        $span.text(name);
+        var _index      = $span.parents('.mergelist').attr('data-index');
+        var _mergelist  = mergelistForIndex(_index);
+        _mergelist.name = name;
+        //mergelistSave(_index, _mergelist);
+      }
+      $span.show();
     }
-    $span.show();
   });
   
 });

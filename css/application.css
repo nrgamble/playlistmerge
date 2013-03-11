@@ -10,26 +10,36 @@ body, html { overflow: visible !important; }
 }
 
 .mergelist {
-  margin: 0 0 20px 0;
+  margin: 20px 0;
 }
+
 .header {
   margin: 0 0 4px 0;
 }
+.header > img { float: left; }
+.header h3 {
+  margin: -2px 0 0 6px;
+  float: left;
+}
 .header input {
-  width: 200px;
   display: none;
-  border: 1px solid #d6d5d2;
-  font-size: 1em;
+  font-size: 1.2em;
   font-weight: bold;
+  margin: -2px 0 0 6px;
+  padding: 0;
+  float: left;
 }
 .header input:focus {
-  position: absolute;
-  margin: -1px 0 0 3px;
+  margin: -3px 0 -1px 4px;
 }
+.add {
+  margin: -4px 0 -4px 6px;
+  float: left;
+}
+
 .playlists a {
   margin: 0 6px 0 0;
 }
-
 
 .controls {
   float: left;
@@ -45,16 +55,6 @@ body, html { overflow: visible !important; }
   background: url(sp://playlistmerge/img/add.png) no-repeat center;
   background-size: 100px 100px;
 }
-.addplaylist .sp-button-text { font-size: .9em; }
-
-.tracks {
-  border: 1px solid #d6d5d2;
-  border-radius: 4px;
-  overflow: hidden;
-}
-.tracks p {
-  text-align: center;
-}
 .play {
   display: block;
   width: 79px;
@@ -66,9 +66,22 @@ body, html { overflow: visible !important; }
 .play:hover {
   background: url(sp://playlistmerge/img/play-over.png);
 }
+.add .sp-button-text {
+  font-size: .9em;
+  font-weight: normal;
+}
+
+.tracks {
+  border: 1px solid #d6d5d2;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.tracks p {
+  text-align: center;
+}
 .history {
   width: 100%;
-  height: 100px;
+  height: 200px;
   margin: 10px 0 0 0;
 }
    
