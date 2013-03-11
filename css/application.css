@@ -15,6 +15,17 @@ body, html { overflow: visible !important; }
 .header {
   margin: 0 0 4px 0;
 }
+.header input {
+  width: 200px;
+  display: none;
+  border: 1px solid #d6d5d2;
+  font-size: 1em;
+  font-weight: bold;
+}
+.header input:focus {
+  position: absolute;
+  margin: -1px 0 0 3px;
+}
 .playlists a {
   margin: 0 6px 0 0;
 }
@@ -37,7 +48,6 @@ body, html { overflow: visible !important; }
 .addplaylist .sp-button-text { font-size: .9em; }
 
 .tracks {
-  height: 256px;
   border: 1px solid #d6d5d2;
   border-radius: 4px;
   overflow: hidden;
@@ -55,6 +65,11 @@ body, html { overflow: visible !important; }
 }
 .play:hover {
   background: url(sp://playlistmerge/img/play-over.png);
+}
+.history {
+  width: 100%;
+  height: 100px;
+  margin: 10px 0 0 0;
 }
    
 .over {
