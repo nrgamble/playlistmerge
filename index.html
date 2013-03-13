@@ -59,7 +59,7 @@
               
               var add = buttons.Button.withLabel('Add as Playlist');
               add.setIcon('img/add-icon.png');
-              $mergelist.find('.add').append(add.node);
+              $mergelist.find('.add').append(add.node).on('click', function () { mergelistAdd($(this).parents('.mergelist')); });
               
               $mergelist.find('.play').on('click', function () { mergelistPlay($(this).parents('.mergelist')); });
               
@@ -85,6 +85,10 @@
         }, false);
       });
     
+      models.player.load().done(function (player) {
+        player.addEventListener('change:track', mergelistChangeTrack);
+      });
+    
       var playHistory;
       var listHistory;
       models.Playlist.createTemporary('mergelist-playhistory').done(function (history) {
@@ -103,13 +107,11 @@
         models.player.load().done(function (player) {
           player.setShuffle(true);
           player.playContext(models.Playlist.fromURI($_mergelist.attr('data-uri')));
-          // TODO: don't attach on every play
-          player.addEventListener('change:track', function () { mergelistChangeTrack($_mergelist); });
-          mergelistChangeTrack($_mergelist);
         });
       }
       
-      function mergelistChangeTrack($_mergelist) {
+      function mergelistChangeTrack() {
+        var $_mergelist = $('.mergelist');
         models.player.load(['context', 'playing', 'track']).done(function (player) {
           if (player.playing && player.context.uri == $_mergelist.attr('data-uri')) {
             models.Playlist.fromURI(playHistory).load(['tracks']).done(function (history) {
@@ -122,13 +124,26 @@
           }
         });
       }
+      
+      function mergelistAdd($_mergelist) {
+        models.Playlist.create($_mergelist.find('h3').text()).done(function (playlist) {
+          playlist.load(['tracks']).done(function (_playlist) {
+            models.Playlist.fromURI($_mergelist.attr('data-uri')).load(['tracks']).done(function (templist) {
+              templist.tracks.snapshot(0, 1000).done(function(snapshot) {
+                _playlist.tracks.add(snapshot.toArray());
+              });
+            });
+          });
+        });
+      }
+      
     });
   </script>
 </head>
 
 <body>
 
-  <h1>Playlist Merge</h1>
+  <h1>Playlist Mash</h1>
   
   <p>Add playlists to a mergelist by dragging them from your sidebar</p>
   <hr>
@@ -136,7 +151,7 @@
   <div class="mergelist clearfix" data-uri="#" data-index="0">
     <div class="header clearfix">
       <img src="sp://playlistmerge/img/playlist.png" width="14" height="14">
-      <h3>Untitled Mergelist</h3>
+      <h3>Mashlist</h3>
       <input type="text">
       <span class="add"></span>
     </div>

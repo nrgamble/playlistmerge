@@ -26,7 +26,7 @@ $(function () {
       $this.hide();
       if (name.length) {
         $span.text(name);
-        var _index      = $span.parents('.mergelist').attr('data-index');
+        var _index      = $this.parents('.mergelist').attr('data-index');
         var _mergelist  = mergelistForIndex(_index);
         _mergelist.name = name;
         //mergelistSave(_index, _mergelist);
