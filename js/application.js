@@ -1,10 +1,10 @@
 /* Playlist Merge */
 
-var MERGELISTS = localStorage['playlistmerge.mergelists'];
-if (typeof MERGELISTS == 'undefined') {
-  MERGELISTS = [];
+var MASHLISTS = localStorage['playlistmerge.mashlists'];
+if (typeof MASHLISTS == 'undefined') {
+  MASHLISTS = [];
 } else {
-  MERGELISTS = JSON.parse(MERGELISTS);
+  MASHLISTS = JSON.parse(MASHLISTS);
 }
 
 $(function () {
@@ -26,10 +26,10 @@ $(function () {
       $this.hide();
       if (name.length) {
         $span.text(name);
-        var _index      = $this.parents('.mergelist').attr('data-index');
-        var _mergelist  = mergelistForIndex(_index);
-        _mergelist.name = name;
-        //mergelistSave(_index, _mergelist);
+        var _index      = $this.parents('.mashlist').attr('data-index');
+        var _mashlist  = mashlistForIndex(_index);
+        _mashlist.name = name;
+        //mashlistSave(_index, _mashlist);
       }
       $span.show();
     }
@@ -37,19 +37,19 @@ $(function () {
   
 });
 
-function mergelistForIndex(_index) {
-  if (MERGELISTS.length) {
-    _mergelist = MERGELISTS[_index];
+function mashlistForIndex(_index) {
+  if (MASHLISTS.length) {
+    _mashlist = MASHLISTS[_index];
   } else {
-    _mergelist = {
+    _mashlist = {
       'name'      : '',
       'playlists' : []
     };
   }
-    return _mergelist;
+    return _mashlist;
 }
       
-function mergelistSave(_index, _mergelist) {
-  MERGELISTS[_index] = _mergelist;
-  localStorage['playlistmerge.mergelists'] = JSON.stringify(MERGELISTS);
+function mashlistSave(_index, _mashlist) {
+  MASHLISTS[_index] = _mashlist;
+  localStorage['playlistmerge.mashlists'] = JSON.stringify(MASHLISTS);
 }

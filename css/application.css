@@ -9,7 +9,11 @@ body, html { overflow: visible !important; }
   height: 0;
 }
 
-.mergelist {
+h1 {
+  border-bottom: 1px solid #d6d5d2;
+}
+
+.mashlist {
   margin: 20px 0;
 }
 
@@ -36,9 +40,23 @@ body, html { overflow: visible !important; }
   margin: -4px 0 -4px 6px;
   float: left;
 }
+.add .sp-button-text {
+  font-size: .9em;
+  font-weight: normal;
+}
 
+.including {
+  color: #747474;
+}
+.playlists {
+  color: #343434;
+}
 .playlists a {
   margin: 0 6px 0 0;
+  color: #343434;
+}
+.playlists a:hover {
+  text-decoration: none;
 }
 
 .controls {
@@ -47,28 +65,41 @@ body, html { overflow: visible !important; }
   text-align: center;
 }
 .dropzone {
-  height: 128px;
-  width: 128px;
-  margin: 0 0 6px 0;
-  border: 1px solid #d6d5d2;
+  height: 126px;
+  width: 126px;
+  margin: 0 0 12px 0;
+  border: 2px dashed #d6d5d2;
   border-radius: 4px;
   background: url(sp://playlistmerge/img/add.png) no-repeat center;
   background-size: 100px 100px;
+}
+.dropzone.over {
+  border-style: dashed;
+  border-color: #7ab800;
+  background-image: url(sp://playlistmerge/img/add-over.png);
 }
 .play {
   display: block;
   width: 79px;
   height: 79px;
-  margin: 0 auto;
-  background: url(sp://playlistmerge/img/play.png);
+  margin: 0 auto 24px auto;
+  background-image: url(sp://playlistmerge/img/play.png);
   cursor: pointer;
 }
 .play:hover {
-  background: url(sp://playlistmerge/img/play-over.png);
+  background-image: url(sp://playlistmerge/img/play-over.png);
 }
-.add .sp-button-text {
-  font-size: .9em;
-  font-weight: normal;
+.reload {
+  display: block;
+  width: 50px;
+  height: 50px;
+  margin: 0 auto;
+  background-image: url(sp://playlistmerge/img/delete-remove-close.png);
+  background-size: 50px 50px;
+  cursor: pointer;
+}
+.reload:hover {
+  background-image: url(sp://playlistmerge/img/delete-remove-close-over.png);
 }
 
 .tracks {
@@ -76,17 +107,10 @@ body, html { overflow: visible !important; }
   border-radius: 4px;
   overflow: hidden;
 }
-.tracks p {
-  text-align: center;
+.tracks h4 {
+  margin: .5em;
 }
 .history {
   width: 100%;
-  height: 200px;
-  margin: 10px 0 0 0;
-}
-   
-.over {
-  border-style: dashed;
-  border-color: #7ab800;
-  background-image: url(sp://playlistmerge/img/add-over.png);
+  height: 400px;
 }

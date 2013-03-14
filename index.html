@@ -14,9 +14,10 @@
   <script src="sp://playlistmerge/js/jquery.js"></script>
   <script src="sp://playlistmerge/js/application.js"></script>
   <script>
-    require(['$api/models', '$views/buttons', '$views/utils/dnd', '$views/list#List'], function(models, buttons, dnd, List) {
+    require(['$api/models', '$views/buttons', '$views/utils/dnd', '$views/list#List', '$views/popup#Popup'],
+    function(models, buttons, dnd, List, Popup) {
       
-      // TODO: generate all existing playlists
+      // TODO: generate all existing mashlists
       
       [].forEach.call(document.querySelectorAll('.dropzone'), function(dropBox) {
         dropBox.addEventListener('dragstart', function(e) {
@@ -37,36 +38,46 @@
           var $dropzone  = $(this);
           $dropzone.removeClass('over empty');
           
-          var $mergelist = $dropzone.parents('.mergelist');
+          var $mashlist = $dropzone.parents('.mashlist');
           
-          var index = $mergelist.attr('data-index');
+          var index = $mashlist.attr('data-index');
           
-          var mergelist = mergelistForIndex(index);
+          var mashlist = mashlistForIndex(index);
           
           var playlistURI = e.dataTransfer.getData('text');
           
-          if (mergelist.playlists.indexOf(playlistURI) != -1) {
+          if (mashlist.playlists.indexOf(playlistURI) != -1) {
             return;
           }
           
           var templist;
           
-          if ($mergelist.attr('data-uri') == '#') {           
-            models.Playlist.createTemporary('mergelist-untitled').done(function (temp) {
+          if ($mashlist.attr('data-uri') == '#') {           
+            models.Playlist.createTemporary('mashlist-untitled').done(function (temp) {
               templist = temp;
               
-              $mergelist.attr('data-uri', templist.uri);
+              $mashlist.attr('data-uri', templist.uri);
               
               var add = buttons.Button.withLabel('Add as Playlist');
               add.setIcon('img/add-icon.png');
-              $mergelist.find('.add').append(add.node).on('click', function () { mergelistAdd($(this).parents('.mergelist')); });
+              $mashlist.find('.add').append(add.node).on('click', function () { mashlistAdd($(this).parents('.mashlist')); });
               
-              $mergelist.find('.play').on('click', function () { mergelistPlay($(this).parents('.mergelist')); });
+              $mashlist.find('.play').on('click', function () {
+                mashlistPlay($(this).parents('.mashlist'));
+                return false;
+              });
               
-              mergelist.name = 'Untitled Mergelist';
+              $mashlist.find('.reload').on('click', function () {
+                var popup = Popup.withText('Are you sure?');
+                popup.showFor(this);
+                //window.location.reload();
+                return false;
+              });
+              
+              mashlist.name = $mashlist.find('h3').text();
             });
           } else {
-            templist = models.Playlist.fromURI($mergelist.attr('data-uri'));
+            templist = models.Playlist.fromURI($mashlist.attr('data-uri'));
           }
           
           templist.load(['tracks']).done(function(temp) {            
@@ -76,22 +87,29 @@
                 temp.tracks.add(snapshot.toArray());
               });
               
-              $mergelist.find('.playlists').append($('<a/>').attr('href', playlist.uri).text(playlist.name));
-              mergelist.playlists.push(playlist.uri);
+              $playlists = $mashlist.find('.playlists');
+              if ($playlists.children('a').length == 0) {
+                $playlists.text('');
+              }
+              $playlists.append($('<a/>').attr('href', playlist.uri).text(playlist.name));
+              mashlist.playlists.push(playlist.uri);
             });
           });
           
-          //mergelistSave(index, mergelist);
+          //mashlistSave(index, mashlist);
         }, false);
       });
     
+      
+      // Add listener for track changing
       models.player.load().done(function (player) {
-        player.addEventListener('change:track', mergelistChangeTrack);
+        player.addEventListener('change:track', mashlistChangeTrack);
       });
-    
+      
+      // Create temporary playlist for mashlist play history
       var playHistory;
       var listHistory;
-      models.Playlist.createTemporary('mergelist-playhistory').done(function (history) {
+      models.Playlist.createTemporary('mashlist-playhistory').done(function (history) {
         playHistory = history.uri;
         history.load('tracks').done(function() {
           listHistory = List.forCollection(history.tracks, {
@@ -103,17 +121,21 @@
         });
       });
       
-      function mergelistPlay($_mergelist) {        
+      // Start playing a mashlist
+      function mashlistPlay($_mashlist) {
+        $('.mashlist').attr('data-playing', 0);
+        $_mashlist.attr('data-playing', 1);
         models.player.load().done(function (player) {
           player.setShuffle(true);
-          player.playContext(models.Playlist.fromURI($_mergelist.attr('data-uri')));
+          player.playContext(models.Playlist.fromURI($_mashlist.attr('data-uri')));
         });
       }
       
-      function mergelistChangeTrack() {
-        var $_mergelist = $('.mergelist');
+      // Listener for Spotify track changing
+      function mashlistChangeTrack() {
+        var $_mashlist = $('.mashlist[data-playing="1"]');
         models.player.load(['context', 'playing', 'track']).done(function (player) {
-          if (player.playing && player.context.uri == $_mergelist.attr('data-uri')) {
+          if (player.playing && player.context.uri == $_mashlist.attr('data-uri')) {
             models.Playlist.fromURI(playHistory).load(['tracks']).done(function (history) {
               history.tracks.add(player.track);
               listHistory.refresh();
@@ -125,10 +147,11 @@
         });
       }
       
-      function mergelistAdd($_mergelist) {
-        models.Playlist.create($_mergelist.find('h3').text()).done(function (playlist) {
+      // Create a playlist from a mashlist
+      function mashlistAdd($_mashlist) {
+        models.Playlist.create($_mashlist.find('h3').text()).done(function (playlist) {
           playlist.load(['tracks']).done(function (_playlist) {
-            models.Playlist.fromURI($_mergelist.attr('data-uri')).load(['tracks']).done(function (templist) {
+            models.Playlist.fromURI($_mashlist.attr('data-uri')).load(['tracks']).done(function (templist) {
               templist.tracks.snapshot(0, 1000).done(function(snapshot) {
                 _playlist.tracks.add(snapshot.toArray());
               });
@@ -139,29 +162,32 @@
       
     });
   </script>
+  
+  <!-- TODO: Google Analytics -->
 </head>
 
 <body>
 
   <h1>Playlist Mash</h1>
   
-  <p>Add playlists to a mergelist by dragging them from your sidebar</p>
-  <hr>
-   
-  <div class="mergelist clearfix" data-uri="#" data-index="0">
+  <div class="mashlist clearfix" data-uri="#" data-index="0" data-playing="false">
     <div class="header clearfix">
       <img src="sp://playlistmerge/img/playlist.png" width="14" height="14">
       <h3>Mashlist</h3>
       <input type="text">
       <span class="add"></span>
     </div>
-    <p><strong>Including playlists:</strong> <span class="playlists"></span></p>
+    <p class="including">Including playlists: <span class="playlists">Add playlists by dragging them from your sidebar</span></p>
     <div class="controls">
-      <div class="dropzone"></div>
-      <a class="play"></a>
+      <div class="dropzone" title="Drag playlists here"></div>
+      <a class="play" href="#" title="Play mashlist"></a>
+      <a class="reload" href="#" title="Clear mashlist"></a>
     </div>
     <div class="tracks">
-      <p>Play History</p>
+      <h4>
+        <img src="sp://playlistmerge/img/play-queue.png" width="14" height="12">        
+        Play History
+      </h4>
       <div class="history"></div>
     </div>
   </div>
