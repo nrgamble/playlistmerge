@@ -29,7 +29,7 @@ $(function () {
         var _index      = $this.parents('.mashlist').attr('data-index');
         var _mashlist  = mashlistForIndex(_index);
         _mashlist.name = name;
-        //mashlistSave(_index, _mashlist);
+        mashlistSave(_index, _mashlist);
       }
       $span.show();
     }

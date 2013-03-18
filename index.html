@@ -60,19 +60,11 @@
               
               var add = buttons.Button.withLabel('Add as Playlist');
               add.setIcon('img/add-icon.png');
-              $mashlist.find('.add').append(add.node).on('click', function () { mashlistAdd($(this).parents('.mashlist')); });
+              $mashlist.find('.add').append(add.node).on('click', function () { mashlistAddPlaylist($(this).parents('.mashlist')); });
               
-              $mashlist.find('.play').on('click', function () {
-                mashlistPlay($(this).parents('.mashlist'));
-                return false;
-              });
+              $mashlist.find('.play').on('click', function () { mashlistPlay($(this).parents('.mashlist')); });
               
-              $mashlist.find('.reload').on('click', function () {
-                var popup = Popup.withText('Are you sure?');
-                popup.showFor(this);
-                //window.location.reload();
-                return false;
-              });
+              $mashlist.find('.remove').on('click', function () { mashlistRemove(this); });
               
               mashlist.name = $mashlist.find('h3').text();
             });
@@ -82,21 +74,28 @@
           
           templist.load(['tracks']).done(function(temp) {            
             models.Playlist.fromURI(playlistURI).load(['name', 'tracks']).done(function (playlist) {
-
               playlist.tracks.snapshot(0, 1000).done(function(snapshot) {
                 temp.tracks.add(snapshot.toArray());
               });
               
-              $playlists = $mashlist.find('.playlists');
+              var $playlists = $mashlist.find('.playlists');
               if ($playlists.children('a').length == 0) {
                 $playlists.text('');
               }
-              $playlists.append($('<a/>').attr('href', playlist.uri).text(playlist.name));
+              
+              var name = playlistURI.match(/user\/(.*)\/starred$/);
+              if (name.length) {
+                name = 'Starred (' + name[1] + ')';
+              } else {
+                name = playlist.name;
+              }
+              
+              $playlists.append($('<a/>').attr('href', playlist.uri).text(name));
               mashlist.playlists.push(playlist.uri);
             });
           });
           
-          //mashlistSave(index, mashlist);
+          mashlistSave(index, mashlist);
         }, false);
       });
     
@@ -148,7 +147,7 @@
       }
       
       // Create a playlist from a mashlist
-      function mashlistAdd($_mashlist) {
+      function mashlistAddPlaylist($_mashlist) {
         models.Playlist.create($_mashlist.find('h3').text()).done(function (playlist) {
           playlist.load(['tracks']).done(function (_playlist) {
             models.Playlist.fromURI($_mashlist.attr('data-uri')).load(['tracks']).done(function (templist) {
@@ -158,6 +157,28 @@
             });
           });
         });
+      }
+      
+      // Remove a mashlist
+      function mashlistRemove(_remove) {
+        var _popup;
+        
+        var $_div = $('<div/>');
+        $_div.append('Are you sure?&nbsp;&nbsp;');
+        
+        var $_yes = $('<span/>');
+        var _yes  = buttons.Button.withLabel('Yes');
+        _yes.setAccentuated(true);                
+        $_yes.append(_yes.node).on('click', function () { window.location.reload(); });
+        
+        var $_no = $('<span/>');
+        var _no  = buttons.Button.withLabel('No');
+        $_no.append(_no.node).on('click', function () { _popup.dispose(); });
+        
+        $_div.append($_no).append($_yes);
+        
+        _popup = Popup.withContent($_div.get()[0], 218, 24);
+        _popup.showFor(_remove);
       }
       
     });
@@ -180,8 +201,8 @@
     <p class="including">Including playlists: <span class="playlists">Add playlists by dragging them from your sidebar</span></p>
     <div class="controls">
       <div class="dropzone" title="Drag playlists here"></div>
-      <a class="play" href="#" title="Play mashlist"></a>
-      <a class="reload" href="#" title="Clear mashlist"></a>
+      <div class="play" href="#" title="Play mashlist"></div>
+      <div class="remove" href="#" title="Clear mashlist"></div>
     </div>
     <div class="tracks">
       <h4>
