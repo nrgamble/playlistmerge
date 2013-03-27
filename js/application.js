@@ -1,4 +1,4 @@
-/* Playlist Merge */
+/* Playlist Mash */
 
 var MASHLISTS = localStorage['playlistmerge.mashlists'];
 if (typeof MASHLISTS == 'undefined') {
@@ -46,10 +46,15 @@ function mashlistForIndex(_index) {
       'playlists' : []
     };
   }
-    return _mashlist;
+  return _mashlist;
 }
       
 function mashlistSave(_index, _mashlist) {
   MASHLISTS[_index] = _mashlist;
+  localStorage['playlistmerge.mashlists'] = JSON.stringify(MASHLISTS);
+}
+
+function mashlistRemoveAll() {
+  MASHLISTS = [];
   localStorage['playlistmerge.mashlists'] = JSON.stringify(MASHLISTS);
 }

@@ -13,176 +13,7 @@
   
   <script src="sp://playlistmerge/js/jquery.js"></script>
   <script src="sp://playlistmerge/js/application.js"></script>
-  <script>
-    require(['$api/models', '$views/buttons', '$views/utils/dnd', '$views/list#List', '$views/popup#Popup'],
-    function(models, buttons, dnd, List, Popup) {
-      
-      // TODO: generate all existing mashlists
-      
-      [].forEach.call(document.querySelectorAll('.dropzone'), function(dropBox) {
-        dropBox.addEventListener('dragstart', function(e) {
-          e.dataTransfer.setData('text/html', this.innerHTML);
-          e.dataTransfer.effectAllowed = 'copy';
-        }, false);
-        dropBox.addEventListener('dragenter', function(e) { this.classList.add('over'); }, false);
-        dropBox.addEventListener('dragleave', function(e) { this.classList.remove('over'); }, false)
-        dropBox.addEventListener('dragover',  function(e) {
-          if (e.preventDefault) { e.preventDefault(); }
-          e.dataTransfer.dropEffect = 'copy';
-          return false;
-        }, false);
-
-        dropBox.addEventListener('drop', function(e) {
-          if (e.preventDefault) { e.preventDefault(); }
-          
-          var $dropzone  = $(this);
-          $dropzone.removeClass('over empty');
-          
-          var $mashlist = $dropzone.parents('.mashlist');
-          
-          var index = $mashlist.attr('data-index');
-          
-          var mashlist = mashlistForIndex(index);
-          
-          var playlistURI = e.dataTransfer.getData('text');
-          
-          if (mashlist.playlists.indexOf(playlistURI) != -1) {
-            return;
-          }
-          
-          var templist;
-          
-          if ($mashlist.attr('data-uri') == '#') {           
-            models.Playlist.createTemporary('mashlist-untitled').done(function (temp) {
-              templist = temp;
-              
-              $mashlist.attr('data-uri', templist.uri);
-              
-              var add = buttons.Button.withLabel('Add as Playlist');
-              add.setIcon('img/add-icon.png');
-              $mashlist.find('.add').append(add.node).on('click', function () { mashlistAddPlaylist($(this).parents('.mashlist')); });
-              
-              $mashlist.find('.play').on('click', function () { mashlistPlay($(this).parents('.mashlist')); });
-              
-              $mashlist.find('.remove').on('click', function () { mashlistRemove(this); });
-              
-              mashlist.name = $mashlist.find('h3').text();
-            });
-          } else {
-            templist = models.Playlist.fromURI($mashlist.attr('data-uri'));
-          }
-          
-          templist.load(['tracks']).done(function(temp) {            
-            models.Playlist.fromURI(playlistURI).load(['name', 'tracks']).done(function (playlist) {
-              playlist.tracks.snapshot(0, 1000).done(function(snapshot) {
-                temp.tracks.add(snapshot.toArray());
-              });
-              
-              var $playlists = $mashlist.find('.playlists');
-              if ($playlists.children('a').length == 0) {
-                $playlists.text('');
-              }
-              
-              var name = playlistURI.match(/user\/(.*)\/starred$/);
-              if (name.length) {
-                name = 'Starred (' + name[1] + ')';
-              } else {
-                name = playlist.name;
-              }
-              
-              $playlists.append($('<a/>').attr('href', playlist.uri).text(name));
-              mashlist.playlists.push(playlist.uri);
-            });
-          });
-          
-          mashlistSave(index, mashlist);
-        }, false);
-      });
-    
-      
-      // Add listener for track changing
-      models.player.load().done(function (player) {
-        player.addEventListener('change:track', mashlistChangeTrack);
-      });
-      
-      // Create temporary playlist for mashlist play history
-      var playHistory;
-      var listHistory;
-      models.Playlist.createTemporary('mashlist-playhistory').done(function (history) {
-        playHistory = history.uri;
-        history.load('tracks').done(function() {
-          listHistory = List.forCollection(history.tracks, {
-            'fields' : ['star', 'share', 'track', 'artist', 'album'],
-            'height' : 'fixed'
-          });
-          $('.history').append(listHistory.node);
-          listHistory.init();
-        });
-      });
-      
-      // Start playing a mashlist
-      function mashlistPlay($_mashlist) {
-        $('.mashlist').attr('data-playing', 0);
-        $_mashlist.attr('data-playing', 1);
-        models.player.load().done(function (player) {
-          player.setShuffle(true);
-          player.playContext(models.Playlist.fromURI($_mashlist.attr('data-uri')));
-        });
-      }
-      
-      // Listener for Spotify track changing
-      function mashlistChangeTrack() {
-        var $_mashlist = $('.mashlist[data-playing="1"]');
-        models.player.load(['context', 'playing', 'track']).done(function (player) {
-          if (player.playing && player.context.uri == $_mashlist.attr('data-uri')) {
-            models.Playlist.fromURI(playHistory).load(['tracks']).done(function (history) {
-              history.tracks.add(player.track);
-              listHistory.refresh();
-              $('.sp-list-item').on('dblclick', function (e) {
-                e.stopImmediatePropagation();
-              });
-            });
-          }
-        });
-      }
-      
-      // Create a playlist from a mashlist
-      function mashlistAddPlaylist($_mashlist) {
-        models.Playlist.create($_mashlist.find('h3').text()).done(function (playlist) {
-          playlist.load(['tracks']).done(function (_playlist) {
-            models.Playlist.fromURI($_mashlist.attr('data-uri')).load(['tracks']).done(function (templist) {
-              templist.tracks.snapshot(0, 1000).done(function(snapshot) {
-                _playlist.tracks.add(snapshot.toArray());
-              });
-            });
-          });
-        });
-      }
-      
-      // Remove a mashlist
-      function mashlistRemove(_remove) {
-        var _popup;
-        
-        var $_div = $('<div/>');
-        $_div.append('Are you sure?&nbsp;&nbsp;');
-        
-        var $_yes = $('<span/>');
-        var _yes  = buttons.Button.withLabel('Yes');
-        _yes.setAccentuated(true);                
-        $_yes.append(_yes.node).on('click', function () { window.location.reload(); });
-        
-        var $_no = $('<span/>');
-        var _no  = buttons.Button.withLabel('No');
-        $_no.append(_no.node).on('click', function () { _popup.dispose(); });
-        
-        $_div.append($_no).append($_yes);
-        
-        _popup = Popup.withContent($_div.get()[0], 218, 24);
-        _popup.showFor(_remove);
-      }
-      
-    });
-  </script>
+  <script src="sp://playlistmerge/js/spotify.js"></script>
   
   <!-- TODO: Google Analytics -->
 </head>
@@ -199,10 +30,12 @@
       <span class="add"></span>
     </div>
     <p class="including">Including playlists: <span class="playlists">Add playlists by dragging them from your sidebar</span></p>
-    <div class="controls">
+    <div class="left">
       <div class="dropzone" title="Drag playlists here"></div>
-      <div class="play" href="#" title="Play mashlist"></div>
-      <div class="remove" href="#" title="Clear mashlist"></div>
+      <div class="controls">
+        <div class="play" href="#" title="Play mashlist"></div>
+        <div class="remove" href="#" title="Clear mashlist"></div>
+      </div>
     </div>
     <div class="tracks">
       <h4>

@@ -59,7 +59,7 @@ h1 {
   text-decoration: none;
 }
 
-.controls {
+.left {
   float: left;
   margin: 0 6px 0 0;
   text-align: center;
@@ -77,6 +77,9 @@ h1 {
   border-style: dashed;
   border-color: #7ab800;
   background-image: url(sp://playlistmerge/img/add-over.png);
+}
+.controls {
+  display: none;
 }
 .play {
   display: block;

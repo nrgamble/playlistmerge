@@ -1,16 +1,21 @@
 {
-  "AppDescription": { "en": "Playlist Merge" },
-	"AppIcon": { "36x18": "tutorial.png" },
-	"AppName": { "en": "Playlist Merge" },
-	"BundleIdentifier" : "playlistmerge",
-	"BundleType" : "Application",
-	"BundleVersion" : "0.1",
-	"Dependencies" : {
-	  "api"       : "1.10.2",
-    "views"     : "1.18.1"
-  },
-	"SupportedLanguages" : [ "en" ],
-	"VendorIdentifier": "com.nickgamble",
+  "AppName"        : { "en": "Playlist Mash" },
+  "AppDescription" : { "en": "Can't decide what mood you're in?  Mashup your playlists to feed all your needs!" },
 
-  "AcceptedLinkTypes" : [ "playlist" ]
+  "AppIcon" : { "36x18" : "tutorial.png" },
+
+  "BundleType"    : "Application",
+  "BundleVersion" : "0.1",
+
+  "BundleIdentifier" : "playlistmerge",
+  "VendorIdentifier" : "com.nickgamble",
+
+  "Dependencies" : {
+    "api"   : "1.10.2",
+    "views" : "1.18.1"
+  },
+
+  "SupportedLanguages"  : [ "en" ],
+  "AcceptedLinkTypes"   : [ "playlist" ],
+  "RequiredPermissions" : [ "http://www.google-analytics.com" ]
 }
